@@ -1,0 +1,778 @@
+мы возьмем за основу проект, который мы сделали для заметок
+
+и начнем его переделывать
+
+если мы начинаем работать в браузере, нам нужно понисать, что 
+node.js - это серверный язык. это значит, что мы можем создать web-сервер,
+который будет позволять видеть нам страницы и с ними взаимодействовать 
+
+для этого существует стандартный модуль http
+
+const http = require("http")
+
+с его помощью мы можем создать наш первый веб-сервер
+
+http.createServer((req, res)=>{//передаем в метод колбек, который в свою  
+    // очередь принимает 2 параметра: request и response
+    
+})//создает веб-сервер
+
+и результатом вызова этого метода мы получаем объект сервера
+
+далее после создания метода мы должны его запустить
+server.listen(3000,()=>{
+    
+})//запуская сервер мы передаем 2 параметра:
+// 1) порт,
+// 2) опционально можно передать колбек, который запустится если сервер,
+// успешно запустился
+
+при запуске отпишем об его успехе в консоль
+
+port,()=>{
+    console.log(chalk.green(`Server has been started on port ${port}`))
+    // при успшеном запуске отпишемся об этом в консоли и укажем, на каком
+    // порте запустились
+})
+
+и чтобы запустить веб сервер мы обратимся к ноде к файлу в котором мы
+запустили server.listen()
+
+node index
+
+сервер успешно запустится
+мы увидем надпись и мы останемся в этой консоли, тк сервер запустился (
+cхожее было при npm start)
+
+чтобы проверить работает ли сервер в действительности мы можем перейти 
+в браузере на localhost:"номер порта"
+
+и сейчас при переходе на наш порт будет бесконечная загрузка
+
+попробуем в колбеке, который мы передовали в функцию для создания сервера,
+передать какойнибудь console.log 
+
+теперь перезапустим снова наш сервер через ноду
+
+const server = http.createServer((req, res)=>{
+    console.log("Server!")
+})
+
+в консоли мы увидем пока только надпись о том, что серрвер запустился
+
+но когда мы подуключаемся через браузер к серверу уже срабатывает 
+описаный выше console.log()
+
+но все равно будет бесконечная загрузка.
+Это происходит изза того, что мы не описали, что делать серверу
+
+чтобы передовать серверу то, что он должен делать у нас есть 2 параметра
+из колбека request и response
+
+и чтобы максимально просто показать страницу вызовем метод res.end()
+(завершить запрос)
+
+const server = http.createServer((req, res)=>{
+    console.log("Server!")
+
+    res.end("Hello from server")//завершить ответ, выдав то что в 
+    // параметре метода как ответ с сервера
+})
+
+попробуем снова перезапустить сервер
+
+и теперь переходя на наш сервер мы получам в ответ надпись переданную в
+res.end()
+
+//2. Автоматизация с Nodemon
+
+чтобы понять, что нам делать дальше посмотрим на параметр создания сервера
+request
+
+const server = http.createServer((req, res)=>{
+
+    console.log("Request: ", req)//смотрим, что такое req
+
+    res.end("Hello from server")
+})
+
+перезапустим сервер, чтобы сработали изменения
+
+и мы получаем гигантский объект
+
+объект req - прилетает от клиента
+
+давайте посмотрим некоторые параметры, который клиент отправляет 
+при запросе на подключению к серверу
+
+const server = http.createServer((req, res)=>{
+    console.log("Request method ", req.method)//метод в запросе от клиента
+    console.log("Request url", req.url)//путь от клиента
+
+    res.end("Hello from server")
+
+})
+
+мы увидем надпись о том, что клиент просит запрос get по пути "/"
+(каждый раз когда мы переходим на какиелибо страници в интернете мы 
+делаем get запрос)
+
+сейчас, чтобы проверять наши изменения мы каждый раз перезапускаем сервер 
+и мы можем это исправить зайдя в package.json 
+
+мы тут можем прописать какие команды мы выполняем при определенных 
+скриптах через npm 
+
+к примеру start
+
+  "scripts": {
+    "start": "node index",//выполняем запуска файла index через ноду
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+теперь мы можем писать npm start и будет срабатывать одноименный скрипт
+но это не решает проблему
+
+чтобы ее исправить мы установим дополнительный пакет
+
+npm i nodemon --D 
+(флаг -D означает что мы устанавливаем пакет как зависимость для 
+разработки)
+
+теперь у нас добавилось поле devDependesies в package.json
+
+и чтобы пользоваться nodemon мы можем добавить новый скрипт и чтобы 
+он выполнял следующую команду
+
+  "scripts": {
+    "start": "node index.js",
+    "serve": "nodemon index.js",//запускаем теперь через нодемон
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+далее запустим наш сервер через nodemon 
+
+npm run serve
+(run мы пишем при всез скриптаз. при start не писали, тк он есть по 
+умолчанию в npm)
+
+теперь при запуске через нодемон наш сервер будет перезапускаться при 
+изменении файлов через которые он работает
+
+//3. Вывод HTML-страницы
+
+мы хотим теперь выводить нормальную html страницу сервера.
+для этого создадим папку pages и в ней inde.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Node simple server</title>
+</head>
+<body>
+    
+</body>
+</html>
+
+так-же подключим bootstrap и зададим базовую разметку
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <title>Node simple server</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Biba</h1>
+    </div>
+</body>
+</html>
+
+теперь наша задача в том, что - если пользователь делает get запрос на 
+наш сервер мы должны ему отправить html страницу(как делают все сервера
+когда мы переходим на их страницы сайтов)
+
+сделаем проверку на метод запроса от пользователь и тогда мы отдаем html
+
+мы воспользуемся модулем fs, чтобы считать html файл и следовательно нам 
+нужен path для указания путей к файлам
+
+(так-же небольшая информация об объектах request и response 
+request - содержит информацию о том, что пришло на сервер
+response - это то, с помощью чего сервер отвечает)
+
+const fs = require("fs/promises")//для чтения файла html
+const path = require("path")//для коректных путей
+
+const basePath = path.join(__dirname, "./pages")//путь до папки с 
+// страницами
+const server = http.createServer( async (req, res)=>{
+    if ( req.method === "GET") {
+        const page = await fs.readFile(path.join(basePath, "./index.html"))
+        //читаем html файл чтобы получить его как константу
+
+        res.end(page)//завершаем ответ выдавая html страницу
+    }
+})//создает веб-сервер
+
+теперь попробуем посмотреть, что получилось
+
+сервер выдает нам html страницу
+
+чтобы более коректно работать нам нужно указать в header запроса 
+(мета информация о запросах на сервер) , какой код статуса у нас был
+от нашего запроса и тот тип контента, который мы отправляем пользователю
+
+после того, как мы считали какойто файл мы можем в ответ указать хедер
+
+    if ( req.method === "GET") {
+        const page = await fs.readFile(path.join(basePath, "./index.html"))
+
+        res.setHeader("Content-Type","text/html")
+        // указываем доп информацию в хедере, какую наш 
+        // клиент должен знать.(браузер будет знать, что он работает с 
+        // текстом и html и не будет тратить время на определения того, 
+        // какого типа информация пришла с сервера)
+        res.writeHead(200)//отправляем код статуса(200 - успешный статус)
+        res.end(page)
+    }
+
+теперь мы можем проверить в браузере в разделе networks какие хедеры к нам
+пришли 
+
+мы увидем что при подключении наш сервер отправляет браузеру информацию о 
+том, что тип контента у него text/html 
+
+мы можем указать, что мы присылаем обычный текст и тогда бразуер просто 
+скопирует весь код из файла pages/index.html
+
+        res.setHeader("Content-Type","text/plain")
+
+вернем все на html
+
+так-же мы можем отправлять и статус ошибки и браузер будет думать, что у 
+нас ошибка хотя мы и отправляем успешно файл index.html
+
+также есть альтернативный способ setHeader
+
+        res.writeHead(200, {
+            "Content-Type": "text/html"//альтернативный способ setHeader
+            // указываем в методе writeHead в объект все необходимые 
+            // ключи и их знения 
+        })
+
+далее сделаем небольшую разметку для формы, которая будет отправлять 
+записки на наш сервер
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <title>Node simple server</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Biba</h1>
+
+        <form action="/" method="post">
+            <div class="form-group">
+                <input type="text" name="title" class="form-control">
+            </div>
+            <button class="btn btn-primary">Create</button>
+        </form>
+    </div>
+</body>
+</html>
+
+укажем кнопке type="submit" чтобы браузер перезагрузился и отправил форму
+
+//4. Обработка POST-запроса
+
+и так сейчас если мы сделаем запрос post через кнопку в форме(
+метод пост отправляется изза соответствующего атребута method в элементе 
+form) у нас снова будет бесконечная загрузка изза того, что мы 
+обрабатываем только метод get
+
+
+    if ( req.method === "GET") {
+        const page = await fs.readFile(path.join(basePath, "./index.html"))
+
+        res.writeHead(200, {
+            "Content-Type": "text/html"
+        })
+        res.end(page)
+    }
+
+так-что добавим обработку post запроса
+
+
+const server = http.createServer( async (req, res)=>{
+
+    if ( req.method === "GET") {
+        const page = await fs.readFile(path.join(basePath, "./index.html"))
+
+        res.writeHead(200, {
+            "Content-Type": "text/html"
+        })
+        res.end(page)
+    } else if (req.method === "POST") {
+        res.end("Пост отправлен")// пока будем просто закачнивать ответ 
+        // надписью
+    }
+
+})
+
+теперь мы будем получать надпись при обновлении страници и чтобы её 
+убрать нам нужно перейти на localhost по url иначе браузер будет помнить,
+что мы хотим сделать post запрос 
+
+сейчас нам нужно получить данные с фронтенда, но это сложно сделат с 
+помощью стандартного модуля http
+
+        req.on("data", data => {
+            console.log(data)
+        })//с помощью этого метода мы добавляем события
+        // с помощью события data мы псомтрим что мы получаем в data 
+
+и благодаря этому событию мы получаем данные отправляемые через post 
+в виде buffer
+
+        const body = []
+
+        req.on("data", data => {
+            body.push(Buffer.from(data))//пушим все получаемые данные в
+            //  body переводя их из буфера в нормальные данные
+        })
+
+теперь нам нужно понять, когда запросы у пользователя закончатся и для
+этого мы можем добавить еще одно событие на запрос
+
+else if (req.method === "POST") {
+        const body = []// 
+
+        req.on("data", data => {
+            body.push(Buffer.from(data))//пушим все получаемые данные в
+            //  body переводя их из буфера в нормальные данные
+        })//с помощью этого метода мы добавляем события
+        // с помощью события data мы получаем данные, который нам 
+        // отправляет клиент в виде буфера
+           
+        req.on("end", ()=>{//событие сработает, когда запрос закончится
+            console.log(body.toString())
+        } )
+
+        res.end("Post success")// пока будем просто закачнивать ответ 
+        // надписью
+    }
+
+мы получим следующую строчку
+
+name=content
+name - имя импута
+content - то что ввел пользователь
+
+по этому мы и вписывали в инпут атребут name
+
+то есть чтобы получить контент нашего инпута мы разделим строчку на 2 
+части и возьмем 2ю часть
+
+        req.on("end", ()=>{
+            console.log(body.toString().split("=")[1])//разделили по 
+            //символу "="
+        })
+
+так-же мы будем получать вместо пробелоав + и мы их заменим
+
+        req.on("end", ()=>{
+            console.log(body.toString().split("=")[1].replaceAll("+"," "))
+        })
+
+так-же чтобы человек не мог отправлять пустую строку мы поставим 
+атребут required на input
+
+                <input type="text" name="title" class="form-control" required>
+
+теперь мы можем взять строку которую мы вводим в инпуте и поместить в 
+константу
+
+        req.on("end", ()=>{
+            const title = body.toString().split("=")[1].replaceAll("+"," ")
+        })
+
+и мы теперь добавим этот файл в db.json
+
+const {addNote} = require("./notes.controller")
+
+        req.on("end", async ()=>{
+            const title = body.toString().split("=")[1].replaceAll("+"," ")
+            
+            addNote(title)//использовали метод из контроллера
+        })
+
+//5. Работа с Express.js
+
+библиотека Express позволяет куда проще работать с серверами
+
+остановим наш сервер и скачаем Express
+
+npm install express --save
+
+теперь нам нужно переделать немного код 
+
+const app = express()//аналог http.createServer()
+
+app.listen(port,()=>{//теперь делаем app.listen
+    console.log(chalk.green(`Server has been started on port ${port}`))
+})
+
+метод listen работает так-же через express, как и было через createServer
+
+сейчас мы хотим обработать get запрос через express
+
+app.get("/", ()=>{//принимает 1) url по которому идет запрос 2) колбек,
+    // который так-же принимает req и res 
+
+})//обрабатываем get запрос
+
+через express().get() получаемые параметры в колбек request 
+и response имеют больший функционал, нежели через http (app = expess())
+
+при гет запросе на главную страницу мы отправляли наш html файл
+и у сейчашнего response есть специальный метод для этого
+
+app.get("/", (req, res)=>{
+    res.sendFile(path.join(basePath, "./index.html"))// так мы в ответ на 
+    // get запрос отправим файл (даже читать его не над POG)
+})
+
+теперь попробуем снова запустить сервер
+у нас выдается html страница
+
+теперь нам нужно обработать post запрос, который мы делаем на главной
+странице в форме
+
+app.post("/", (req, res) => {
+    console.log(req.body)
+    res.sendFile(path.join(basePath, "./index.html"))
+    // пока будем просто отрисовывать главную страницу и посмотрим, что мы 
+    // получаем в request.body(там-должен быть контент отправляемый через
+    // post)
+})
+
+мы получаем undefined
+
+это происходит потому, что мы не объяснили express c какими данными он 
+работает
+
+app.use(express.urlencoded({
+    extended:true
+}))//с помощью этого мы сможем получать данные из импорта
+
+и теперь перезапустя сервер мы получаем объект с ключами равными 
+параметру name в инпуте, а его значение - значение инпута
+
+теперь мы можем передовать наши значения для записи файла
+
+app.post("/", (req, res) => {
+    addNote(req.body.title)
+    res.sendFile(path.join(basePath, "./index.html"))
+})
+
+проверим функционал
+
+и все работает
+
+в дополнение express удобен тем, что он сам отправляет все нужные хедеры
+и все нужные типы данных которые обрабатывает браузер 
+(так-же есть прикольчик в том что в хедерах серверов написаных с express
+есть поле X-Powered-By: Express - это значит что сервер использует express
+и для браузера эта инфа бесполезна, но небольшая реклама)
+
+//6. Вывод списка элементов. EJS
+
+чтобы передовать данные из сервера в браузер (о записках) и выводить их 
+
+мы можем так-же использовать express
+
+но мы теперь не сможем работать с html, нам понадобятся некоторые 
+шаблонизаторы, которые будут генерировать html на основе данных, которые
+мы получаем с сервера
+
+для этого нам понадобится библиотека ejs 
+
+npm i ejs
+
+(подобные шаблонизаторы есть в php(и наверное нечто подобное происходит в 
+React))
+
+теперь нам не нужно импортировать ejs, а нам нужно указать определенные
+параметры в app
+
+app.set(
+    "view engine", "ejs"//первый параметр - то что мы хотим 
+    // переопределить (шаблонизатор)
+    // второй параметр какой шаблонизатор мы используем
+)
+
+и теперь мы можем переименовать файл index.html в .ejs
+
+сейчас когда мы используем шаблонизатор мы можем не отправлять каждый рас
+в ответ страницу
+
+мы теперь будем использовать метод render
+
+app.get("/", (req, res)=>{
+    res.render("index")//благодаря шаблонизаторам используем render
+    //параметр - название файла, который рендерим
+})
+
+и сейчас у нас высветится ошибка о том, что не могут найти файл 
+index в папке views, тк по умолчанию метод render ищет именно 
+папку views
+
+мы можем снова изменить эту базовую настройку так-же используя
+app.set()
+
+app.set("views", "pages")//поменяли папку в которой render ищет файлы
+
+теперь нам нужно передовать определенные параметры для прорисовки
+страницы
+
+app.get("/", (req, res)=>{
+    res.render("index",{
+        title: "Express App"
+    })
+    //1й параметр - название файла, который рендерим
+    //(по умолчанию ищут в папке __dirname/views)
+    //2й - объект options, которые мы передаем на фронтенд
+})
+
+далее чтобы получить эти параметры, которые мы передаем мы 
+пишем следующее <%имя параметра%> 
+
+к примеру поместим параметр title в head>title>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <title><%= title %></title>//вот
+</head>
+<body>
+    <div class="container">
+        <h1><%= title %></h1>//вот
+
+        <form action="/" method="post" class="mb-2">
+            <div class="form-group mb-2">
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+    </div>
+</body>
+</html>
+
+и сейчас передастся значение параметра title туда, куда мы его 
+указали
+
+и теперь мы можем передавать в параметр еще и notes
+
+app.get("/", async (req, res)=>{
+    res.render("index",{
+        title: "Express App", 
+        notes: await getNotes()//метод асинхронный по этому ждем 
+        // результата
+    })
+})
+
+теперь будем выводить их
+
+<body>
+    <div class="container">
+        <h1><%= title %></h1>
+
+        <form action="/" method="post" class="mb-2">
+            <div class="form-group mb-2">
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+
+        <div class="card">
+            <ul class="list-group">
+                <li class="list-group-item"></li>
+            </ul>
+        </div>//будем выводить в списке
+    </div>
+</body>
+
+теперь возникает проблема связанная стем, каким образом нам 
+итерировать масив записок
+
+мы используем ejs
+
+            <ul class="list-group">
+                <% for (let i = 0; i< notes.length; i++) {%>
+                    <li class="list-group-item">
+                        <%= notes[i].title %>
+                        //выводим title каждого note
+                    </li>
+                <% }%>//закрыли li в кобочки цикла
+            </ul>
+
+(
+  <%%> - места где мы используем js
+  <%=контент%> - рисуем контент на страницу 
+)
+
+так-же будем передовать список при post запросе
+
+app.post("/", async (req, res) => {
+    await addNote(req.body.title)
+    res.render("index",{
+        title: "Express App", 
+        notes: await getNotes()
+    })
+})
+
+(иначе после поста вылетает ошибка, тк мы в любом случае рендерим 
+index и там идет итерация notes)
+
+//7. Асинхронное удаление элементов
+
+теперь когда мы добавляем запись будем еще сообщать об этом 
+пользователю
+
+передадим для этого параметры
+
+app.get("/", async (req, res)=>{
+    res.render("index",{
+        title: "Express App", 
+        notes: await getNotes(),
+        created: false//
+    })
+})
+
+app.post("/", async (req, res) => {
+    await addNote(req.body.title)
+    res.render("index",{
+        title: "Express App", 
+        notes: await getNotes(),
+        created: true//
+    })
+})
+
+теперь будем выводить сообщение проверяя параметр
+
+    <% if(created) {%>
+        <div class="alert alert-success">
+            Note has been created
+        </div>
+    <%} %>//делаем в самом верху body
+
+теперь нам нужно добавить функционал по удалению заметок
+для начала вставим кнопку к каждому элементу списка
+
+<li class="d-flex list-group-item justify-content-between align-items-center">
+    <%= notes[i].title %>
+    <button class="btn btn-danger">x</button>
+</li>
+
+далее нам нужно сделать так чтобы при нажатии на кнопку удалялся 
+конкретный элемент
+
+начнем создание нашей логики создав папку public и там файл app.js
+и будем выводить в браузерную консоль надпись
+
+console.log("КТО МЯУКАЕТ?!")
+
+и теперь мы подключим этот скрипт в наш html файл
+
+    <script src="/app.js"></script>
+
+мы будем использовать пути как в разработке, по этому сейчас 
+мы добавим еще один параметр в express, чтобы наш index.ejs
+видел этот src
+
+app.use(express.static(path.join(__dirname, "./public")))
+
+теперь index.ejs будут видеть src выше
+
+и сейчас мы можем работать с элементами dom через js в app.js
+
+
+document.addEventListener("click",async (e)=>{
+    if (e.target.dataset.type === "remove") {
+        const id = e.target.dataset.id
+        
+        console.log(id)//выводим в консоль id кнопки удаления(такой же у записки)
+    }
+})
+
+и теперь нам нужно добавить еще один обработчик запроса в inde.js
+
+app.delete("/:id", async (req, res) => {//добавляем обработчик запроса
+    // delete на страницу с параметром id
+    console.log(req.params.id)//получаем id из параметров url
+    res.render("index",{
+        title: "Express App", 
+        notes: await getNotes(),
+        created: false
+    })
+})
+
+и далее нам нужно отправить пользователя на путь с параметром 
+при клике на удаление
+
+document.addEventListener("click",async (e)=>{
+    if (e.target.dataset.type === "remove") {
+        const id = e.target.dataset.id
+        
+        fetch(`/${id}`,{
+            method: "DELETE"
+        })//вот так указали метод delete и на какую страницу 
+        // отправляемся
+    }
+})
+
+теперь мы можем проверить работу метода в меню network
+мы увидем, что наш запрос отправился с коректным id и в ответ мы 
+получаем наш index.ejs
+
+и тепрь мы удаляем записку
+
+app.delete("/:id", async (req, res) => {
+    const {id} = (req.params)//получаем id из параметров url
+    await removeNote(id)
+    res.render("index",{
+        title: "Express App", 
+        notes: await getNotes(),
+        created: false
+    })
+})
+
+и сейчас при нажатии на удаление записка удаляется в базе данных,
+но все еще показывается в браузере
+
+по этому мы удалим через app.js 
+
+        remove(id).then(()=>{
+            e.target.parentNode.remove()//после нажатия на кнопки 
+            //мы выходим в родителя(li) и удаляем его
+        })
